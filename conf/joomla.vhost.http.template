@@ -8,7 +8,8 @@ map $http_x_forwarded_proto $fastcgi_https {
 
 server {
   listen     80;
-  server_name {{SERVER_NAME}};
+  server_name localhost;
+  #server_name {{SERVER_NAME}};
   ### The public root folder of the site
   root   /var/www/vhosts/{{SERVER_NAME}}/httpdocs;
 

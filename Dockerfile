@@ -1,4 +1,4 @@
-FROM dockerfile/nginx
+FROM library/nginx
 
 ###########################################################################
 #	                                                                  #
@@ -12,16 +12,18 @@ FROM dockerfile/nginx
 
 ENV WWW_DIR /var/www/vhosts
 ENV MYSQL_DATA /var/mysql
-ENV JOOMLA_VERSION 3.3.1
-ENV SERVER_NAME example.com
+ENV JOOMLA_VERSION 3.4.1
+ENV SERVER_NAME ves3x.psd401.net
 
 ###########################################################################
 #	php5, openssh-server, supervisord and mariaDb installation        #
 ###########################################################################
-RUN add-apt-repository -y ppa:ondrej/php5; apt-get -y --force-yes update
+RUN apt-get -y --force-yes update
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --force-yes software-properties-common
+#RUN add-apt-repository -y ppa:ondrej/php5; apt-get -y --force-yes update
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --force-yes -q\
   openssh-server openssl supervisor mariadb-server\
-  cron\
+  cron wget vim zip\
   php5-fpm php5 php5-cli php5-dev php-pear php5-common php5-apcu\
   php5-mcrypt php5-gd php5-mysql php5-curl php5-json\
   memcached php5-memcached\
@@ -34,8 +36,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get upgrade -y --force-yes
 ###########################################################################
 #	Download the latest joomla version.                               #
 ###########################################################################
-RUN wget http://joomlacode.org/gf/download/frsrelease/19524/159412/Joomla_${JOOMLA_VERSION}-Stable-Full_Package.tar.bz2
-
+RUN wget http://joomlacode.org/gf/download/frsrelease/20021/162258/Joomla_${JOOMLA_VERSION}-Stable-Full_Package.zip
 
 ###########################################################################
 #	Install and config memcache                                       #
@@ -67,6 +68,8 @@ ADD conf/www.conf.template /tmp/www.conf.template
 
 # nginx
 ADD conf/nginx.conf /etc/nginx/nginx.conf
+
+RUN mkdir /etc/nginx/sites-enabled
 
 # fast cgi parameter
 #ADD conf/fastcgi_params /etc/nginx/fastcgi_params
@@ -126,4 +129,4 @@ RUN chmod u+rx /tmp/setup.sh;
 
 EXPOSE 22 443
 
-ENTRYPOINT ["/tmp/setup.sh"]
+ENTRYPOINT ["/tmp/setup.sh", "setup-joomla"]

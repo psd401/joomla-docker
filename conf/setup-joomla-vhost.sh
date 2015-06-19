@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # to be sure $JOOMLA_VERSION is set
-JOOMLA_VERSION=${JOOMLA_VERSION:-3.3.1}
+JOOMLA_VERSION=${JOOMLA_VERSION:-3.4.1}
 SERVER_NAME=${SERVER_NAME:-${1}}
 WWW_PATH=${WWW_PATH:-/var/www/vhosts}
-HTTPS_ON=${HTTPS_ON:-true}
+HTTPS_ON=${HTTPS_ON:-false}
 
 vhost_ssl_path=/etc/nginx/ssl/vhosts/${SERVER_NAME}
 ssl_key=${vhost_ssl_path}/${SERVER_NAME}.key
@@ -52,8 +52,8 @@ mkdir -p ${vhost_www_path}/logs
 ############################################################################
 
 # unzip the downloaded joomla tar to /var/www/vhosts/$SERVER_NAME/httpdocs
-echo "Unzipping Joomla_${JOOMLA_VERSION}-Stable-Full_Package.tar.bz2 to ${vhost_www_path}/httpdocs."
-tar xjf Joomla_${JOOMLA_VERSION}-Stable-Full_Package.tar.bz2  -C ${vhost_www_path}/httpdocs
+echo "Unzipping Joomla_${JOOMLA_VERSION}-Stable-Full_Package.zip to ${vhost_www_path}/httpdocs."
+unzip Joomla_${JOOMLA_VERSION}-Stable-Full_Package.zip -d ${vhost_www_path}/httpdocs
 
 # set server name in vhost template
 # it will set 
@@ -151,5 +151,7 @@ fi
 #	Enable site with sym link to sites-enabled.                         #
 #############################################################################
 echo "Enabling site $vhost_config via sym link."
-cp $vhost_config /etc/nginx/sites-enabled/$SERVER_NAME
+ln -s $vhost_config /etc/nginx/sites-enabled/$SERVER_NAME
 
+echo "Removing default nginx conf"
+rm /etc/nginx/conf.d/default.conf
