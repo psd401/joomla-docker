@@ -13,7 +13,7 @@ FROM library/nginx
 ENV WWW_DIR /var/www/vhosts
 ENV MYSQL_DATA /var/mysql
 ENV JOOMLA_VERSION 3.4.1
-ENV SERVER_NAME ves3x.psd401.net
+ENV SERVER_NAME joomlatest.psd401.net
 
 ###########################################################################
 #	php5, openssh-server, supervisord and mariaDb installation        #
