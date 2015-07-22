@@ -1,4 +1,4 @@
-FROM library/nginx
+FROM library/ubuntu
 
 ###########################################################################
 #	                                                                  #
@@ -11,8 +11,7 @@ FROM library/nginx
 ###########################################################################
 
 ENV WWW_DIR /var/www/vhosts
-ENV MYSQL_DATA /var/mysql
-ENV JOOMLA_VERSION 3.4.1
+ENV JOOMLA_VERSION 3.4.3
 ENV SERVER_NAME joomlatest.psd401.net
 
 ###########################################################################
@@ -22,7 +21,7 @@ RUN apt-get -y --force-yes update
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --force-yes software-properties-common
 #RUN add-apt-repository -y ppa:ondrej/php5; apt-get -y --force-yes update
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --force-yes -q\
-  openssh-server openssl supervisor mariadb-server\
+  openssh-server nginx openssl supervisor\ 
   cron wget vim zip\
   php5-fpm php5 php5-cli php5-dev php-pear php5-common php5-apcu\
   php5-mcrypt php5-gd php5-mysql php5-curl php5-json\
@@ -36,7 +35,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get upgrade -y --force-yes
 ###########################################################################
 #	Download the latest joomla version.                               #
 ###########################################################################
-RUN wget http://joomlacode.org/gf/download/frsrelease/20021/162258/Joomla_${JOOMLA_VERSION}-Stable-Full_Package.zip
+RUN wget http://github.com/joomla/joomla-cms/releases/download/${JOOMLA_VERSION}/Joomla_${JOOMLA_VERSION}-Stable-Full_Package.zip
 
 ###########################################################################
 #	Install and config memcache                                       #
@@ -69,8 +68,11 @@ ADD conf/www.conf.template /tmp/www.conf.template
 # nginx
 ADD conf/nginx.conf /etc/nginx/nginx.conf
 
-RUN mkdir /etc/nginx/sites-enabled
+#RUN mkdir /etc/nginx/sites-enabled
 
+
+ADD conf/crontab /etc/cron.d/backup-cron
+RUN chmod 0644 /etc/cron.d/backup-cron
 # fast cgi parameter
 #ADD conf/fastcgi_params /etc/nginx/fastcgi_params
 
@@ -98,7 +100,7 @@ ADD conf/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 # After container is started, this script should be called
 # via ssh from host to set the root password(s).
 # it will also set mysql_history to /dev/null
-ADD init-mysql.sh /tmp/init-mysql.sh
+#ADD init-mysql.sh /tmp/init-mysql.sh
 
 # add secure-joomla.sh script to harden permissions after web installation
 ADD secure-joomla.sh /tmp/secure-joomla.sh
@@ -115,11 +117,11 @@ ADD conf/setup-joomla-vhost.sh /tmp/setup-joomla-vhost.sh
 #	- vhost php-fpm pool configurations                              #
 #	for taking backups                                               #
 ##########################################################################
-VOLUME ["/var/mysql"]
-VOLUME ["/var/www"]
+
+#VOLUME ["/var/mysql"]
 VOLUME ["/var/www/vhosts"]
 VOLUME ["/etc/nginx/sites-available"]
-VOLUME ["/etc/nginx/ssl"]
+#VOLUME ["/etc/nginx/ssl"]
 VOLUME ["/etc/php5/fpm/pool.d"]
 
 # Add setup script.
@@ -127,6 +129,6 @@ ADD setup.sh /tmp/setup.sh
 # Make it executable for root
 RUN chmod u+rx /tmp/setup.sh;
 
-EXPOSE 22 443
+EXPOSE 22 80
 
 ENTRYPOINT ["/tmp/setup.sh", "setup-joomla"]

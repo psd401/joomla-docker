@@ -39,11 +39,6 @@ if [ $1 = "backup" ] ; then
   
   echo "Creating a backup..."
 
-  if [ -d /var/mysql ]; then
-    echo "Creating mysql-backup.tar"
-    tar cf /backup/backup/mysql-backup.tar /var/mysql
-  fi
- 
   if [ -d /var/www/vhosts ]; then
     echo "Creating vhosts-www-backup.tar"
     tar cf /backup/backup/vhosts-www-backup.tar /var/www/vhosts
@@ -84,13 +79,9 @@ mkdir -p $JOOMLA_DATA
 
 echo "Creating directory for php-fpm pool unix sockets"
 mkdir -p /var/run
-
-echo "Creating directory for the mysql data"
-mkdir -p $MYSQL_DATA
-
-echo "Creating directory for the running mysql daemon and"
-echo "set correct owner ship and permissions"
-mkdir -p /var/run/mysqld; chown mysql:mysql /var/run/mysqld
+#echo "Creating directory for the running mysql daemon and"
+#echo "set correct owner ship and permissions"
+#mkdir -p /var/run/mysqld; chown mysql:mysql /var/run/mysqld
 
 echo "Creating directory for the running ssh daemon and"
 echo "setting correct owner ship and permissions"
@@ -140,10 +131,6 @@ echo 'root:'${rootpw}'' |chpasswd
 #       MariaDb config                                                   #
 ##########################################################################
 
-echo "Configure maria db to use our MYSQL_DATA directory."
-#RUN sed -i 's/^innodb_flush_method/#innodb_flush_method/' /etc/mysql/my.cnf &&\
-sed -i -e 's/^datadir\s*=.*/datadir = \/var\/mysql/' /etc/mysql/my.cnf
-
  
 ###########################################################################
 #this is neeeded to "repair" the data tables and everything               #
@@ -152,10 +139,10 @@ sed -i -e 's/^datadir\s*=.*/datadir = \/var\/mysql/' /etc/mysql/my.cnf
 #echo "Running mysql_install_db to fix tables."
 #mysql_install_db
 
-if [ ! -d /var/mysql/mysql ]; then
-  echo "Running mysql_install_db..."
-  mysql_install_db --user=mysql
-fi
+#if [ ! -d /var/mysql/mysql ]; then
+#  echo "Running mysql_install_db..."
+#  mysql_install_db --user=mysql
+#fi
 
 ###########################################################################
 #	SSL (HTTPS setup                                                  #
@@ -167,10 +154,6 @@ mkdir -p /etc/nginx/ssl/vhosts
 #########################################################################
 #	Setting scripts executable.                                     #
 #########################################################################
-echo "Setting /tmp/init-mysql.sh executable."
-echo "INFO: Call it after first container start to set mysql passwords."
-chmod u+rx /tmp/init-mysql.sh
-
 echo "Setting /tmp/secure-joomla.sh executable."
 echo "INFO: Call it after joomla web installation to harden permissions."
 chmod u+rx /tmp/secure-joomla.sh
@@ -217,12 +200,6 @@ if [ -d /tmp/ssl ]; then
   rm --interactive=never -R /tmp/ssl
 fi
 
-if [ -d /tmp/mysql ]; then
-  echo "Copy everything from /tmp/mysql to /var/mysql..."
-  sudo -u mysql cp /tmp/mysql/* /var/mysql
-  rm --interactive=never -R /tmp/mysql
-fi
-
 if [ -d /tmp/php-fpm-pools ]; then
   echo "Copy everything from /tmp/php-fpm-pools to /etc/php5/fpm/pool.d/"
   cp -R /tmp/php-fpm-pools/* /etc/php5/fpm/pool.d/
@@ -239,12 +216,6 @@ rm -f /etc/nginx/sites-available/default
 ###########################################################################
 #	Restoring from /tmp/backup if available.                          #
 ###########################################################################
-
-if [ -f /tmp/backup/mysql-backup.tar ] ; then
-  echo "Restoring mariaDb (mysql) data."
-  tar -C / -xvf /tmp/backup/mysql-backup.tar
-  #rm -f /tmp/backup/mysql-backup.tar
-fi 
 
 if [ -f /tmp/backup/vhosts-www-backup.tar ] ; then
   echo "Restoring vhosts www data to /var/www/vhosts."
@@ -281,23 +252,15 @@ echo "Setting ownership of $JOOMLA_DATA to www-data:www-data ..."
 chown -R www-data:www-data $JOOMLA_DATA
 
 echo "Setting permissions for $JOOMLA_DATA to 0755..."
-chmod 0755 $JOOMLA_DATA
-
-echo "Setting ownership for $MYSQL_DATA to mysql:mysql..."
-chown mysql:mysql $MYSQL_DATA
-chmod 700 $MYSQL_DATA
+chmod -R 0755 $JOOMLA_DATA
 
 
 ############################################################################
 #	Setting up php.ini                                                 #
 ############################################################################
 
-
-sed -i -e 's/^datadir\s*=.*/datadir = \/var\/mysql/' /etc/mysql/my.cnf
-
-
 echo "Enabling all available sites via symlinks to /etc/nginx/sites-enabled/"
 ln -s /etc/nginx/sites-available/* /etc/nginx/sites-enabled/
 
-echo "Starting supervisord."
+echo "END Starting supervisord."
 /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf

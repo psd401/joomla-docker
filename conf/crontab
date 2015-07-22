@@ -1,0 +1,1 @@
+* * * * * root cp -r /var/www/vhosts/* /var/backup/

@@ -155,3 +155,7 @@ ln -s $vhost_config /etc/nginx/sites-enabled/$SERVER_NAME
 
 echo "Removing default nginx conf"
 rm /etc/nginx/conf.d/default.conf
+
+echo "Cleaning up Joomla zip"
+
+rm Joomla_${JOOMLA_VERSION}-Stable-Full_Package.zip
