@@ -52,9 +52,13 @@ mkdir -p ${vhost_www_path}/logs
 ############################################################################
 
 # unzip the downloaded joomla tar to /var/www/vhosts/$SERVER_NAME/httpdocs
-echo "Unzipping Joomla_${JOOMLA_VERSION}-Stable-Full_Package.zip to ${vhost_www_path}/httpdocs."
-unzip Joomla_${JOOMLA_VERSION}-Stable-Full_Package.zip -d ${vhost_www_path}/httpdocs
-
+DIR="${vhost_www_path}/httpdocs/"
+if [ "$(ls -A $DIR)" ]; then
+	echo "Skipping Joomla extraction because files already exist"
+else
+	echo "Unzipping Joomla_${JOOMLA_VERSION}-Stable-Full_Package.zip to ${vhost_www_path}/httpdocs."
+        unzip Joomla_${JOOMLA_VERSION}-Stable-Full_Package.zip -d ${vhost_www_path}/httpdocs
+fi
 # set server name in vhost template
 # it will set 
 #   server_name 	.$SERVER_NAME
