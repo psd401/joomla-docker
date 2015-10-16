@@ -19,13 +19,15 @@ vhost_pool=/etc/php5/fpm/pool.d/${SERVER_NAME}-fpm.conf
 #	Setup the joomla.vhost.tempalte in /etc/nginx/sites-available/      #
 #############################################################################
 # SERVER_NAME could be "example.com"
-if [ "$HTTPS_ON" = "true" ]; then
-  echo "Copy joomla.vhost.template to $vhost_config ."
-  cp /tmp/joomla.vhost.template $vhost_config
-else 
-  echo "Copy joomla.vhost.http.template to $vhost_config ."
-  cp /tmp/joomla.vhost.http.template $vhost_config
-fi 
+if [ ! -f $vhost_config ]; then
+	if [ "$HTTPS_ON" = "true" ]; then
+	  echo "Copy joomla.vhost.template to $vhost_config ."
+	  cp /tmp/joomla.vhost.template $vhost_config
+	else 
+	  echo "Copy joomla.vhost.http.template to $vhost_config ."
+	  cp /tmp/joomla.vhost.http.template $vhost_config
+	fi 
+fi
 
 
 #############################################################################
