@@ -168,7 +168,7 @@ chmod u+rx  /tmp/setup-joomla-vhost.sh
 ##########################################################################
 if [ $1 = "setup-joomla" ]; then
   echo "Running setup-joomla-vhost.sh."
-  /tmp/setup-joomla-vhost.sh
+  bash /tmp/setup-joomla-vhost.sh
 fi
 
 

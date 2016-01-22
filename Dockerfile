@@ -71,8 +71,8 @@ ADD conf/nginx.conf /etc/nginx/nginx.conf
 #RUN mkdir /etc/nginx/sites-enabled
 
 
-ADD conf/crontab /etc/cron.d/backup-cron
-RUN chmod 0644 /etc/cron.d/backup-cron
+#ADD conf/crontab /etc/cron.d/backup-cron
+#RUN chmod 0644 /etc/cron.d/backup-cron
 # fast cgi parameter
 #ADD conf/fastcgi_params /etc/nginx/fastcgi_params
 
